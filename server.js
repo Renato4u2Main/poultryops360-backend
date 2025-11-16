@@ -1,15 +1,35 @@
-import express from "express";
-import cors from "cors";
-import genaiRoutes from "./routes/genai.js";
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
+const PORT = process.env.PORT || 3001;
+
 app.use(cors());
 app.use(express.json());
 
-// THIS is the correct mounting
-app.use("/api", genaiRoutes);
+// Health check route
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'Backend is running successfully!' });
+});
 
-const PORT = process.env.PORT || 3000;
+// GenAI route
+app.post('/api/generate', async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    const { generateResponse } = require('./controllers/genaiController');
+    const result = await generateResponse(prompt);
+    res.json({ response: result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Test route
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Backend is working!' });
+});
+
 app.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`);
+  console.log(`🚀 Backend server running on port ${PORT}`);
 });
