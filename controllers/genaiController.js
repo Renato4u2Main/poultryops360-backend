@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/genai";
+import OpenAI from "@google/genai";
 
 export const handleGenAI = async (req, res) => {
   try {
