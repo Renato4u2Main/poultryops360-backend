@@ -3,6 +3,7 @@ import { handleGenAI } from "../controllers/genaiController.js";
 
 const router = express.Router();
 
-router.post("/", handleGenAI);
+// This defines POST /genai
+router.post("/genai", handleGenAI);
 
 export default router;
