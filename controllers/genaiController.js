@@ -1,79 +1,18 @@
-import { GoogleGenAI } from "@google/genai";  // may need adjustment if you use import vs require
+import { GoogleGenerativeAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-export async function handleGenAI(req, res) {
+export const runGenAI = async (req, res) => {
   try {
-    const { type, prompt, image, mimeType, context, projects, milestones, users, clients } = req.body;
+    const { prompt } = req.body;
 
-    let reply;
+    const genAI = new GoogleGenerativeAI(process.env.API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    switch(type) {
-      case "milestoneUpdate":
-        reply = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: prompt
-        });
-        break;
-      case "imageAnalysis":
-        reply = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: {
-            parts: [
-              {
-                inlineData: {
-                  data: image.split(",")[1],
-                  mimeType
-                }
-              },
-              {
-                text: prompt
-              }
-            ]
-          }
-        });
-        break;
-      case "refineComment":
-        reply = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: prompt
-        });
-        break;
-      case "projectSummary":
-        reply = await ai.models.generateContent({
-          model: "gemini-2.5-pro",
-          contents: prompt  // you would rebuild prompt here based on milestones/users
-        });
-        break;
-      case "riskAssessment":
-        reply = await ai.models.generateContent({
-          model: "gemini-2.5-pro",
-          contents: prompt  // same
-        });
-        break;
-      case "weeklyReport":
-        reply = await ai.models.generateContent({
-          model: "gemini-2.5-pro",
-          contents: prompt
-        });
-        break;
-      case "copilot":
-        reply = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: prompt
-        });
-        break;
-      default:
-        return res.status(400).json({ error: "Unknown type" });
-    }
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
 
-    // If reply is object with .text
-    const text = reply.text ? reply.text.trim() : String(reply).trim();
-
-    return res.json({ reply: text });
-
+    res.json({ text });
   } catch (err) {
-    console.error("GenAI endpoint error:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("GenAI error:", err);
+    res.status(500).json({ error: err.message });
   }
-}
+};
