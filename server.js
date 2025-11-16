@@ -1,12 +1,13 @@
 import express from "express";
 import cors from "cors";
-import genaiRouter from "./routes/genai.js";
+import genaiRoutes from "./routes/genaiRoutes.js";  // <-- updated filename
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api", genaiRouter);
+// Main API route
+app.use("/api", genaiRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
