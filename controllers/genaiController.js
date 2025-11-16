@@ -1,18 +1,21 @@
-import OpenAI from "@google/genai";
+const { GoogleGenAI } = require("@google/genai");
 
-export const handleGenAI = async (req, res) => {
+const genAI = new GoogleGenAI({ 
+  apiKey: process.env.GOOGLE_API_KEY 
+});
+
+const generateResponse = async (prompt) => {
   try {
-    const { prompt } = req.body;
-
-    const genAI = new GoogleGenerativeAI(process.env.API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-pro" 
+    });
+    
     const result = await model.generateContent(prompt);
-    const text = result.response.text();
-
-    res.json({ text });
-  } catch (err) {
-    console.error("GenAI error:", err);
-    res.status(500).json({ error: err.message });
+    return result.response.text();
+  } catch (error) {
+    console.error("GenAI Error:", error);
+    throw new Error("Failed to generate response");
   }
 };
+
+module.exports = { generateResponse };
